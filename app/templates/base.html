@@ -1,0 +1,17 @@
+<head>
+    {% if pagename %}
+    <title>{{pagename}}</title>
+    {% else %}
+    <title>My page</title>
+    {% endif %}
+</head>
+<body>
+    <a href="/index">home</a>,
+    {% if current_user.is_anonymous %}
+    <a href="/login">login</a>
+    {% else %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+    {% endif %}
+    <hr>
+    {% block content %}{% endblock %}
+</body>

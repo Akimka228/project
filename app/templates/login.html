@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Sign In</h1>
+<form action="" method = 'post'>
+    Username:<input name='username' type="text" required><br>
+    Password:<input name = 'password' type="password" required><br>
+    <input name = 'remember' type="checkbox">Remember me <br>
+    <button>Enter</button>
+</form>
+{% endblock %}

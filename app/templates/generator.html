@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Генератор паролей</h1>
+  <form action="" method='post'>    
+    <input name='use_number' type="checkbox">Используем цифры <br>
+    <input name='use_lower' type="checkbox">Строчные буквы <br>
+    <input name='use_spec' type="checkbox">Спец. символы <br>
+    Длина пароля: <input required name='password_length' min = '1' max = '20' style = 'width: 50px' type="number">
+    Количество паролей: <input required name='passwords_qty' min = '1' max = '20' style = 'width: 50px' type="number">
+    <button type = 'submit'>Сгенерировать</button>
+    </form>
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <h2>Пароль: </h2>
+  {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+    {% endblock %}
