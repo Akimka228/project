@@ -4,14 +4,28 @@
     {% else %}
     <title>My page</title>
     {% endif %}
+    <!-- Compiled and minified CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
 </head>
 <body>
-    <a href="/index">home</a>,
-    {% if current_user.is_anonymous %}
-    <a href="/login">login</a>
-    {% else %}
-    <a href="{{ url_for('logout') }}">Logout</a>
-    {% endif %}
-    <hr>
+    <nav>
+    <div class="nav-wrapper">
+        <ul class="left hide-on-med-and-down">
+            <li><a href="/index">home</a></li>
+            {% if current_user.is_anonymous %}
+            <li><a href="/login">login</a></li>
+            {% else %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a href="/user/{{ current_user.username }}">My profile</a></li>
+            <li><a href="{{ url_for('edit_profile') }}">Edit your profile</a></li>
+            <li><a href="/add_post">Add your post</a></li>
+            {% endif %}
+        </ul>
+
+        </div>
+    </nav>
     {% block content %}{% endblock %}
 </body>

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class = 'container'>
+<h1>Edit profile</h1>
+<form action="" method = "post">
+    Username:<input name = "new_username" type="text">
+    <br>
+    <textarea  style="resize: none;" name="new_about" id="" cols="30" rows="10" id="icon_prefix2" class="materialize-textarea">{% if current_user.about_me %}{{ current_user.about_me }}{% endif %}
+    </textarea>
+<button class = "btn waves-effect waves-light">Save</button>
+</form>
+</div>
+{% endblock %}

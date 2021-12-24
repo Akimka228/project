@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-<body>
-    <h2>hello! {% if current_user.is_authenticated %} {{ current_user.username }} {% endif %}</h2>
-    <h2>today is: {{date}}</h2>
-    <ul class="collection">
+<div class = 'container'>
+<h1><i class="large account_box"></i>{{ user.username }}</h1><img src="{{ user.get_avatar(128) }}" alt="">
+{% if user.about_me %}
+<p>{{ user.about_me }}</p>
+{% else %}
+<p>No info</p>
+{% endif %}
+{% if user.last_seen %}
+<p>last seen: {{ user.last_seen }}</p>
+{% endif %}
+<ul class="collection">
     
     {% for post in posts %}
     <li class="collection-item avatar">
@@ -15,6 +21,4 @@
     {% endfor %}
 </ul>
 </div>
-
-</body>
 {% endblock %}

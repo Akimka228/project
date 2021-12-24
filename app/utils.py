@@ -1,4 +1,7 @@
 import random
+from flask_mail import Message
+from app import mail
+
 def password_gen(len_pass, use_number, use_lower, use_special, password_qty):
     len_pass = int(len_pass)
     password_qty = int(password_qty)
@@ -19,7 +22,10 @@ def password_gen(len_pass, use_number, use_lower, use_special, password_qty):
         password = ''
 
     return passwords
-
+def send_mail(sender, subject, recepients, text):
+    msg = Message(subject=subject, sender=sender, recipients=recepients)
+    msg.body = text
+    mail.send(msg)
 
 
 
