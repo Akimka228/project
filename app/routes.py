@@ -16,10 +16,11 @@ from app.utils import password_gen, send_mail
 
 @app.route('/')
 @app.route ('/index')
+@app.route('/index/<int:page>')
 @login_required
-def index():
-    all_posts = Post.query.all()
-    return render_template('index.html', date = str(date.today()), pagename = 'test', posts=all_posts)
+def index(page=1):
+    paginated_post = Post.query.order_by(Post.timestamp.desc()).paginate(page, 6, False)
+    return render_template('index.html', date = str(date.today()), pagename = 'test', posts=paginated_post)
 
 
 @app.route ('/generator', methods = ['post', 'get'])

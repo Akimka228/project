@@ -6,7 +6,7 @@
     <h2>today is: {{date}}</h2>
     <ul class="collection">
     
-    {% for post in posts %}
+    {% for post in posts.items %}
     <li class="collection-item avatar">
         <img class="circle" src="{{ post.author.get_avatar(32) }}" alt="">
         <span class="title"><b>{{ post.author.username}}</b></span>
@@ -14,7 +14,10 @@
     </li>
     {% endfor %}
 </ul>
+{% if posts.has_prev %} <a href="{{ url_for('index', page=posts.prev_num) }}">Newer posts</a> {% endif %}
+{% if posts.has_next %} <a href="{{ url_for('index', page=posts.next_num) }}">Older posts</a> {% endif %}
 </div>
-
 </body>
 {% endblock %}
+
+
