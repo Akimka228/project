@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow())
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    
 
 
     def get_avatar(self, size):

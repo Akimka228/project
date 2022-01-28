@@ -13,6 +13,10 @@ from app import db
 from random import *
 from datetime import datetime
 from app.utils import password_gen, send_mail
+import jwt
+import json
+
+tokens = []
 
 @app.route('/')
 @app.route ('/index')
@@ -167,3 +171,74 @@ def reset_password():
 def users_list():
     users = User.query.all()
     return render_template('users.html', users = users)
+
+@app.route('/api/login')
+def api_login():
+    username = request.args['username']
+    password = request.args['password']
+    user = User.query.filter_by(username=username).first() 
+    if user is None or not user.check_password(password):
+        return 'Invalid username/password.', 401
+    else:
+        token = jwt.encode({"user_id": user.id}, "secret", algorithm="HS256")
+        tokens.append(token)
+        return token, 200
+
+@app.route('/api/register')
+def api_register():
+    username = request.args['username']
+    password = request.args['password']
+    email = request.args ['email']
+    user = User(username=username, email=email)
+    user.set_password(password)    
+    try:
+        db.session.add(user)
+        db.session.commit()
+        return 'Register ok', 201
+    except:
+        return 'Register failed', 500
+
+@app.route('/api/posts')
+def get_posts():
+    posts = Post.query.all()
+    posts_json = []
+    for post in posts:
+        print(post)
+        posts_json.append({
+            'id':post.id, 
+            'text':post.text,
+            'author':post.author.username
+        })
+    return json.dumps(posts_json)
+
+@app.route('/api/get_user')
+def get_user():
+    user_id = int(request.args['id'])
+    user = User.query.filter_by(id=user_id).first()
+    return json.dumps({
+        'id':user.id,
+        'E-mail':user.email,
+        'username':user.username,
+        'about_me':user.about_me,
+        'avatar_source':user.get_avatar(128)
+    })
+
+@app.route('/api/add_post')
+def api_add_post():
+    post_text = request.args['post_text']
+    username = request.args['username']
+    user = User.query.filter_by(username=username).first()
+    if len(post_text) in range(1, 300):
+        new_post = Post(text=post_text, author=user, timestamp=datetime.utcnow())
+        db.session.add(new_post)
+        db.session.commit()
+        return 'Post added', 200
+    else:
+        return 'Post text too long or empty!', 400
+@app.route('/api/check_token/<token>')
+def check_token(token):
+    try:
+        token = jwt.decode(token, "secret", algorithm="HS256")
+        return token['user_id']
+    except:
+        return 'User not authorized'
