@@ -7,7 +7,7 @@ from datetime import date
 from app import utils
 from app import login
 from flask_login import current_user, login_user
-from app.models import Post, User
+from app.models import Post, User, Likes
 from flask_login import logout_user, login_required
 from app import db
 from random import *
@@ -182,7 +182,7 @@ def api_login():
     else:
         token = jwt.encode({"user_id": user.id}, "secret", algorithm="HS256")
         tokens.append(token)
-        return token, 200
+        return json.dumps({"token": token, "user":  { "id": user.id,  "name": user.username, "avatar": user.get_avatar(256) } }), 200
 
 @app.route('/api/register')
 def api_register():
@@ -200,14 +200,22 @@ def api_register():
 
 @app.route('/api/posts')
 def get_posts():
-    posts = Post.query.all()
+    user_id = int(request.args['user_id'])
+    page = int(request.args['page'])
+    qty = int(request.args['qty'])
+    paginated_post = Post.query.order_by(Post.timestamp.desc()).paginate(page, qty, False)
+    posts = paginated_post.items
     posts_json = []
     for post in posts:
         print(post)
         posts_json.append({
             'id':post.id, 
             'text':post.text,
-            'author':post.author.username
+            'likes_count':post.likes_count,
+            'already_liked':bool(Likes.query.filter_by(user_id=user_id, post_id=post.id).first()), 
+            'author':{
+                'username': post.author.username, 'avatar': post.author.get_avatar(128), 'id': post.author.id
+            }
         })
     return json.dumps(posts_json)
 
@@ -215,12 +223,16 @@ def get_posts():
 def get_user():
     user_id = int(request.args['id'])
     user = User.query.filter_by(id=user_id).first()
+    print(user)
+    user_posts = [{'post_id': post.id, 'text': post.text, 'timestamp': str(
+        post.timestamp)} for post in Post.query.filter_by(author=user)]
     return json.dumps({
         'id':user.id,
         'E-mail':user.email,
         'username':user.username,
         'about_me':user.about_me,
-        'avatar_source':user.get_avatar(128)
+        'avatar_source':user.get_avatar(128),
+        'posts':user_posts
     })
 
 @app.route('/api/add_post')
@@ -238,7 +250,43 @@ def api_add_post():
 @app.route('/api/check_token/<token>')
 def check_token(token):
     try:
-        token = jwt.decode(token, "secret", algorithm="HS256")
+        token = jwt.decode(token, "secret", algorithms=["HS256"])
         return token['user_id']
     except:
         return 'User not authorized'
+@app.route('/api/delete_post')
+def delete_post():
+    post_id = request.args['post_id']
+    user_id = request.args['user_id']
+    post = Post.query.get(post_id)
+    if post.author.id == int(user_id):
+        db.session.delete(post)
+        db.session.commit()
+        return 'Post Deleted!', 200
+    else:
+        return 'Wrong Author!', 401
+@app.route('/api/set_like')
+def set_like():
+    post_id = request.args['post_id']
+    user_id = request.args['user_id']
+    like = Likes.query.filter_by(user_id=user_id, post_id=post_id).first() 
+    post = Post.query.get(post_id)
+    if like is None: #Если user_id не ставил лайк post_id
+        like = Likes(user_id=user_id, post_id=post_id)
+        post.likes_count += 1
+        db.session.add(like)
+        db.session.commit()
+        return str(post.likes_count)
+    else:
+        current_likes = post.likes_count
+        current_likes -= 1
+        post.likes_count = current_likes
+        db.session.delete(like)
+        db.session.commit()
+        return str(post.likes_count)
+        
+
+
+
+
+
